@@ -1,7 +1,7 @@
 {
   "name": "webpack-config",
   "description": "Basic Webpack project",
-  "version": "0.1",
+  "version": "1.0.0",
   "private": true,
   "author": {
     "name": "Coders In Hoods",
@@ -43,8 +43,5 @@
     "webpack-dev-server": "3.11.0",
     "webpack-subresource-integrity": "1.4.1",
     "webpackbar": "4.0.0"
-  },
-  "dependencies": {
-    "@fortawesome/fontawesome-pro": "5.13.0"
   }
 }

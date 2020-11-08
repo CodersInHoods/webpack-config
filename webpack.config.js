@@ -1,42 +1,36 @@
-const path = require('path')
-const minJSON = require('jsonminify')
-const webpack = require('webpack')
+const path = require("path");
+const minJSON = require("jsonminify");
+const webpack = require("webpack");
 
 const plugins = {
-  progress: require('webpackbar'),
+  progress: require("webpackbar"),
   clean: (() => {
-    const { CleanWebpackPlugin } = require('clean-webpack-plugin')
-    return CleanWebpackPlugin
+    const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+    return CleanWebpackPlugin;
   })(),
-  extractCSS: require('mini-css-extract-plugin'),
-  sync: require('browser-sync-webpack-plugin'),
-  html: require('html-webpack-plugin'),
-  copy: require('copy-webpack-plugin'),
-  sri: require('webpack-subresource-integrity')
-}
+  extractCSS: require("mini-css-extract-plugin"),
+  sync: require("browser-sync-webpack-plugin"),
+  html: require("html-webpack-plugin"),
+  copy: require("copy-webpack-plugin"),
+  sri: require("webpack-subresource-integrity"),
+};
 
 module.exports = (env = {}, argv) => {
-  const isProduction = argv.mode === 'production'
+  const isProduction = argv.mode === "production";
 
   let config = {
-    context: path.resolve(__dirname, 'src'),
+    context: path.resolve(__dirname, "src"),
 
     entry: {
-      vendor: [
-        './styles/vendor.scss',
-        './scripts/vendor.js'
-      ],
-      app: [
-        './styles/app.scss',
-        './scripts/app.js'
-      ]
+      vendor: ["./styles/vendor.scss", "./scripts/vendor.js"],
+      app: ["./styles/app.scss", "./scripts/app.js"],
     },
 
     output: {
-      path: path.resolve(__dirname, 'dist'),
-      publicPath: '',
-      filename: 'scripts/[name].js',
-      crossOriginLoading: 'anonymous'
+      path: path.resolve(__dirname, "dist"),
+      publicPath: "",
+      filename: "scripts/[name].js",
+      crossOriginLoading: "anonymous",
     },
 
     module: {
@@ -47,194 +41,197 @@ module.exports = (env = {}, argv) => {
             {
               loader: plugins.extractCSS.loader,
               options: {
-                publicPath: '../' // use relative path for everything in CSS
-              }
+                publicPath: "../", // use relative path for everything in CSS
+              },
             },
             {
-              loader: 'css-loader',
+              loader: "css-loader",
               options: {
-                sourceMap: !isProduction
-              }
-            },
-            {
-              loader: 'postcss-loader',
-              options: {
-                ident: 'postcss',
                 sourceMap: !isProduction,
-                plugins: (() => [
-                  require('autoprefixer')(),
-                  ...isProduction ? [
-                    require('cssnano')({
-                      preset: ['default', {
-                        minifySelectors: false
-                      }]
-                    })
-                  ] : []
-                ])
-              }
+              },
             },
             {
-              loader: 'sass-loader',
+              loader: "postcss-loader",
               options: {
-                implementation: require('sass'),
+                ident: "postcss",
+                sourceMap: !isProduction,
+                plugins: () => [
+                  require("autoprefixer")(),
+                  ...(isProduction
+                    ? [
+                        require("cssnano")({
+                          preset: [
+                            "default",
+                            {
+                              minifySelectors: false,
+                            },
+                          ],
+                        }),
+                      ]
+                    : []),
+                ],
+              },
+            },
+            {
+              loader: "sass-loader",
+              options: {
+                implementation: require("sass"),
                 sassOptions: {
-                  fiber: require('fibers'),
-                  outputStyle: 'expanded',
-                  sourceMap: !isProduction
-                }
-              }
-            }
-          ]
+                  fiber: require("fibers"),
+                  outputStyle: "expanded",
+                  sourceMap: !isProduction,
+                },
+              },
+            },
+          ],
         },
         {
           test: /\.js$/,
           exclude: /node_modules/,
           use: {
-            loader: 'babel-loader',
+            loader: "babel-loader",
             options: {
-              presets: [
-                '@babel/preset-env'
-              ]
-            }
-          }
+              presets: ["@babel/preset-env"],
+            },
+          },
         },
         {
           test: /\.(gif|png|jpe?g|svg)$/i,
           exclude: /fonts/,
           use: [
             {
-              loader: 'file-loader',
+              loader: "file-loader",
               options: {
-                name: '[path][name].[ext]',
-              }
+                name: "[path][name].[ext]",
+              },
             },
             {
-              loader: 'image-webpack-loader',
+              loader: "image-webpack-loader",
               options: {
                 disable: !isProduction,
                 mozjpeg: {
                   progressive: true,
-                  quality: 65
+                  quality: 65,
                 },
                 optipng: {
-                  enabled: false
+                  enabled: false,
                 },
                 pngquant: {
-                  quality: [0.65, 0.90],
-                  speed: 4
+                  quality: [0.65, 0.9],
+                  speed: 4,
                 },
                 gifsicle: {
-                  interlaced: false
+                  interlaced: false,
                 },
                 webp: {
-                  quality: 75
-                }
-              }
-            }
-          ]
+                  quality: 75,
+                },
+              },
+            },
+          ],
         },
         {
           test: /.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/,
           exclude: /images/,
-          use: [{
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              outputPath: 'fonts/',
-            }
-          }]
+          use: [
+            {
+              loader: "file-loader",
+              options: {
+                name: "[name].[ext]",
+                outputPath: "fonts/",
+              },
+            },
+          ],
         },
         {
           test: /\.html$/,
           use: {
-            loader: 'html-loader'
-          }
-        }
-      ]
+            loader: "html-loader",
+          },
+        },
+      ],
     },
 
     devServer: {
-      contentBase: path.join(__dirname, 'src'),
+      contentBase: path.join(__dirname, "src"),
       port: 8080,
       overlay: {
         warnings: true,
-        errors: true
+        errors: true,
       },
-      quiet: true
+      quiet: true,
     },
 
     plugins: (() => {
       let common = [
         new plugins.extractCSS({
-          filename: 'styles/[name].css'
+          filename: "styles/[name].css",
         }),
         new plugins.html({
-          template: 'index.html',
-          filename: 'index.html',
+          template: "index.html",
+          filename: "index.html",
           minify: {
             removeScriptTypeAttributes: true,
-            removeStyleLinkTypeAttributes: true
-          }
+            removeStyleLinkTypeAttributes: true,
+          },
         }),
         new plugins.progress({
-          color: '#5C98EE'
+          color: "#5C98EE",
         }),
         new webpack.DefinePlugin({
-          'process.env.NODE_ENV': JSON.stringify(
-            isProduction ? 'production' : 'development'
-          )
-        });
-      ]
+          "process.env.NODE_ENV": JSON.stringify(
+            isProduction ? "production" : "development"
+          ),
+        }),
+      ];
 
       const production = [
         new plugins.clean(),
         new plugins.copy({
           patterns: [
             {
-              from: 'data/**/*.json',
-              transform: content => minJSON(content.toString())
-            }
-          ]
+              from: "data/**/*.json",
+              transform: (content) => minJSON(content.toString()),
+            },
+          ],
         }),
         new plugins.sri({
-          hashFuncNames: ['sha384'],
-          enabled: true
-        })
-      ]
+          hashFuncNames: ["sha384"],
+          enabled: true,
+        }),
+      ];
 
       const development = [
         new plugins.sync(
           {
-            host: 'localhost',
+            host: "localhost",
             port: 9090,
-            proxy: 'http://localhost:8080/'
+            proxy: "http://localhost:8080/",
           },
           {
-            reload: false
+            reload: false,
           }
-        )
-      ]
+        ),
+      ];
 
       return isProduction
         ? common.concat(production)
-        : common.concat(development)
+        : common.concat(development);
     })(),
 
     devtool: (() => {
-      return isProduction
-        ? ''
-        : 'source-map'
+      return isProduction ? "" : "source-map";
     })(),
 
     resolve: {
-      modules: [path.resolve(__dirname, 'src'), 'node_modules'],
+      modules: [path.resolve(__dirname, "src"), "node_modules"],
       alias: {
-        '~': path.resolve(__dirname, 'src/scripts/')
-      }
+        "~": path.resolve(__dirname, "src/scripts/"),
+      },
     },
 
-    stats: 'errors-only'
-  }
+    stats: "errors-only",
+  };
 
-  return config
-}
+  return config;
+};
